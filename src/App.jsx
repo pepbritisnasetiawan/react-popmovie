@@ -139,7 +139,7 @@ const WatchedList = ({ watched }) => {
   );
 };
 
-const BoxMovies = ({ children }) => {
+const BoxMovies = ({ element }) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -147,7 +147,7 @@ const BoxMovies = ({ children }) => {
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? '–' : '+'}
       </button>
-      {isOpen && children}
+      {isOpen && element}
     </div>
   );
 };
@@ -201,13 +201,15 @@ export default function App() {
         <NumResult movies={movies} />
       </NavBar>
       <Main>
-        <BoxMovies>
-          <MovieList movies={movies} />
-        </BoxMovies>
-        <BoxMovies>
-          <WatchSummary watched={watched} />
-          <WatchedList watched={watched} />
-        </BoxMovies>
+        <BoxMovies element={<MovieList movies={movies} />} />
+        <BoxMovies
+          element={
+            <>
+              <WatchSummary watched={watched} />
+              <WatchedList watched={watched} />
+            </>
+          }
+        />
       </Main>
     </>
   );
