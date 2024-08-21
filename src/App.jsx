@@ -73,7 +73,7 @@ const Search = () => {
   );
 };
 
-const NumResult = ({movies}) => {
+const NumResult = ({ movies }) => {
   return (
     <p className="num-results">
       Found <strong>{movies?.length}</strong> results
@@ -178,23 +178,12 @@ const WatchList = () => {
   );
 };
 
-const Main = ({ movies }) => {
-  return (
-    <main className="main">
-      <MovieList movies={movies} />
-      <WatchList />
-    </main>
-  );
+const Main = ({ children }) => {
+  return <main className="main">{children}</main>;
 };
 
-const NavBar = ({ movies }) => {
-  return (
-    <nav className="nav-bar">
-      <Logo />
-      <Search />
-      <NumResult movies={movies} />
-    </nav>
-  );
+const NavBar = ({ children }) => {
+  return <nav className="nav-bar">{children}</nav>;
 };
 
 export default function App() {
@@ -202,8 +191,15 @@ export default function App() {
 
   return (
     <>
-      <NavBar movies={movies} />
-      <Main movies={movies} />
+      <NavBar>
+        <Logo />
+        <Search />
+        <NumResult movies={movies} />
+      </NavBar>
+      <Main>
+        <MovieList movies={movies} />
+        <WatchList />
+      </Main>
     </>
   );
 }
