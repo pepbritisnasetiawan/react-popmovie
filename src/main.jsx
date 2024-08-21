@@ -6,7 +6,7 @@ import StarRating from './components/StarRating.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <App /> */}
+    <App />
     <StarRating max={10} color="#fcc419" size={30} />
     <StarRating color="red" size={160} />
     <StarRating color="red" />
