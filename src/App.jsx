@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react';
 
 const tempMovieData = [
@@ -72,17 +73,16 @@ const Search = () => {
   );
 };
 
-const NumResult = () => {
+const NumResult = ({movies}) => {
   return (
     <p className="num-results">
-      Found <strong>x</strong> results
+      Found <strong>{movies?.length}</strong> results
     </p>
   );
 };
 
-const MovieList = () => {
+const MovieList = ({ movies }) => {
   const [isOpen1, setIsOpen1] = useState(true);
-  const [movies, setMovies] = useState(tempMovieData);
   return (
     <div className="box">
       <button
@@ -178,19 +178,32 @@ const WatchList = () => {
   );
 };
 
+const Main = ({ movies }) => {
+  return (
+    <main className="main">
+      <MovieList movies={movies} />
+      <WatchList />
+    </main>
+  );
+};
+
+const NavBar = ({ movies }) => {
+  return (
+    <nav className="nav-bar">
+      <Logo />
+      <Search />
+      <NumResult movies={movies} />
+    </nav>
+  );
+};
+
 export default function App() {
+  const [movies, setMovies] = useState(tempMovieData);
+
   return (
     <>
-      <nav className="nav-bar">
-        <Logo />
-        <Search />
-        <NumResult />
-      </nav>
-
-      <main className="main">
-        <MovieList />
-        <WatchList />
-      </main>
+      <NavBar movies={movies} />
+      <Main movies={movies} />
     </>
   );
 }
