@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const tempMovieData = [
   {
@@ -189,17 +189,9 @@ const NavBar = ({ children }) => {
   return <nav className="nav-bar">{children}</nav>;
 };
 
-const API_KEY = 'c1201907';
-
 export default function App() {
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
-
-  useEffect(() => {
-    fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=marvel&page=1`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search));
-  }, []);
 
   return (
     <>
