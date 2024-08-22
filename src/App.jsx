@@ -189,16 +189,35 @@ const NavBar = ({ children }) => {
   return <nav className="nav-bar">{children}</nav>;
 };
 
+const Loader = () => {
+  return (
+    <div className="loader">
+      <div className="loading-bar">
+        <div className="bar"></div>
+      </div>
+    </div>
+  );
+};
+
 const API_KEY = 'c1201907';
 
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`http://www.omdbapi.com/?apikey=${API_KEY}&s=marvel&page=1`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search));
+    async function fetchMovie() {
+      setIsLoading(true);
+      const res = await fetch(
+        `http://www.omdbapi.com/?apikey=${API_KEY}&s=marvel&page=1`
+      );
+      const data = await res.json();
+      setMovies(data.Search);
+      setIsLoading(false);
+    }
+
+    fetchMovie();
   }, []);
 
   return (
@@ -209,7 +228,9 @@ export default function App() {
         <NumResult movies={movies} />
       </NavBar>
       <Main>
-        <BoxMovies element={<MovieList movies={movies} />} />
+        <BoxMovies
+          element={isLoading ? <Loader /> : <MovieList movies={movies} />}
+        />
         <BoxMovies
           element={
             <>
