@@ -1,30 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 
-const tempMovieData = [
-  {
-    imdbID: 'tt15398776',
-    Title: 'Oppenheimer',
-    Year: '2013',
-    Poster:
-      'https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_SX300.jpg',
-  },
-  {
-    imdbID: 'tt1517268',
-    Title: 'Barbie',
-    Year: '2023',
-    Poster:
-      'https://m.media-amazon.com/images/M/MV5BNjU3N2QxNzYtMjk1NC00MTc4LTk1NTQtMmUxNTljM2I0NDA5XkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg',
-  },
-  {
-    imdbID: 'tt8589698',
-    Title: 'Teenage Mutant Ninja Turtles: Mutant Mayhem',
-    Year: '2023',
-    Poster:
-      'https://m.media-amazon.com/images/M/MV5BYzE4MTllZTktMTIyZS00Yzg1LTg1YzAtMWQwZTZkNjNkODNjXkEyXkFqcGdeQXVyMTUzMTg2ODkz._V1_SX300.jpg',
-  },
-];
-
 const tempWatchedData = [
   {
     imdbID: 'tt15398776',
@@ -60,8 +36,7 @@ const Logo = () => {
   );
 };
 
-const Search = () => {
-  const [query, setQuery] = useState('');
+const Search = ({ query, setQuery }) => {
   return (
     <input
       className="search"
@@ -81,9 +56,9 @@ const NumResult = ({ movies }) => {
   );
 };
 
-const MovieItem = ({ movie }) => {
+const MovieItem = ({ movie, onSelectMovieId }) => {
   return (
-    <li key={movie.imdbID}>
+    <li key={movie.imdbID} onClick={() => onSelectMovieId(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -96,11 +71,15 @@ const MovieItem = ({ movie }) => {
   );
 };
 
-const MovieList = ({ movies }) => {
+const MovieList = ({ movies, onSelectMovieId }) => {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie, index) => (
-        <MovieItem key={index} movie={movie} />
+        <MovieItem
+          key={index}
+          movie={movie}
+          onSelectMovieId={onSelectMovieId}
+        />
       ))}
     </ul>
   );
@@ -148,6 +127,17 @@ const BoxMovies = ({ children }) => {
         {isOpen ? '–' : '+'}
       </button>
       {isOpen && children}
+    </div>
+  );
+};
+
+const MovieDetails = ({ selectedId, onCloseMovie }) => {
+  return (
+    <div className="details">
+      <button className="btn-back" onClick={onCloseMovie}>
+        &#x2715;
+      </button>
+      {selectedId}
     </div>
   );
 };
@@ -214,15 +204,25 @@ export default function App() {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [selectedMovieId, setSelectedMovieId] = useState(null);
 
-  const query = 'marvel';
+  const handleSelectMovieId = (id) => {
+    setSelectedMovieId((selectedId) => (selectedId === id ? null : id));
+  };
+
+  const handleCloseMovieId = () => {
+    setSelectedMovieId(null);
+  };
 
   useEffect(() => {
     async function fetchMovie() {
       try {
         setIsLoading(true);
+        setError('');
+
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
+          `http://www.omdbapi.com/?s=${query}&apikey=${API_KEY}`
         );
 
         if (!res.ok) throw new Error('Something went wrong');
@@ -230,7 +230,7 @@ export default function App() {
         const data = await res.json();
 
         if (data.Response === 'False') throw new Error(data.Error);
-        
+
         setMovies(data.Search);
       } catch (err) {
         setError(err.message);
@@ -239,25 +239,42 @@ export default function App() {
       }
     }
 
+    if (query.length < 3) {
+      setMovies([]);
+      setError('');
+      return;
+    }
+
     fetchMovie();
-  }, []);
+  }, [query]);
 
   return (
     <>
       <NavBar>
         <Logo />
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResult movies={movies} />
       </NavBar>
       <Main>
         <BoxMovies>
           {isLoading && <Loader />}
           {error && <ErrorMessage message={error} />}
-          {!isLoading && !error && <MovieList movies={movies} />}
+          {!isLoading && !error && (
+            <MovieList movies={movies} onSelectMovieId={handleSelectMovieId} />
+          )}
         </BoxMovies>
         <BoxMovies>
-          <WatchSummary watched={watched} />
-          <WatchedList watched={watched} />
+          {selectedMovieId ? (
+            <MovieDetails
+              selectedId={selectedMovieId}
+              onCloseMovie={handleCloseMovieId}
+            />
+          ) : (
+            <>
+              <WatchSummary watched={watched} />
+              <WatchedList watched={watched} />
+            </>
+          )}
         </BoxMovies>
       </Main>
     </>
