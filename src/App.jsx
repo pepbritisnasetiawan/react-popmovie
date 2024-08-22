@@ -139,7 +139,7 @@ const WatchedList = ({ watched }) => {
   );
 };
 
-const BoxMovies = ({ element }) => {
+const BoxMovies = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -147,7 +147,7 @@ const BoxMovies = ({ element }) => {
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? '–' : '+'}
       </button>
-      {isOpen && element}
+      {isOpen && children}
     </div>
   );
 };
@@ -199,22 +199,44 @@ const Loader = () => {
   );
 };
 
+const ErrorMessage = ({ message }) => {
+  return (
+    <div className="error">
+      <span>⛔</span> {message}
+    </div>
+  );
+};
+
 const API_KEY = 'c1201907';
 
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const query = 'marvel';
 
   useEffect(() => {
     async function fetchMovie() {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${API_KEY}&s=marvel&page=1`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
+        );
+
+        if (!res.ok) throw new Error('Something went wrong');
+
+        const data = await res.json();
+
+        if (data.Response === 'False') throw new Error(data.Error);
+        
+        setMovies(data.Search);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     fetchMovie();
@@ -228,17 +250,15 @@ export default function App() {
         <NumResult movies={movies} />
       </NavBar>
       <Main>
-        <BoxMovies
-          element={isLoading ? <Loader /> : <MovieList movies={movies} />}
-        />
-        <BoxMovies
-          element={
-            <>
-              <WatchSummary watched={watched} />
-              <WatchedList watched={watched} />
-            </>
-          }
-        />
+        <BoxMovies>
+          {isLoading && <Loader />}
+          {error && <ErrorMessage message={error} />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+        </BoxMovies>
+        <BoxMovies>
+          <WatchSummary watched={watched} />
+          <WatchedList watched={watched} />
+        </BoxMovies>
       </Main>
     </>
   );
