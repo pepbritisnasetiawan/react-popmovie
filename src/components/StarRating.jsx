@@ -15,16 +15,6 @@ const textStyle = {
   lineHeight: '1',
   margin: '0',
 };
-
-Star.propTypes = {
-  onRate: PropTypes.func.isRequired,
-  full: PropTypes.bool.isRequired,
-  onHoverIn: PropTypes.func.isRequired,
-  onHoverOut: PropTypes.func.isRequired,
-  color: PropTypes.string.isRequired,
-  size: PropTypes.number.isRequired,
-};
-
 const Star = ({ onRate, full, onHoverIn, onHoverOut, color, size }) => {
   const starStyle = {
     width: `${size}px`,
@@ -69,12 +59,23 @@ const Star = ({ onRate, full, onHoverIn, onHoverOut, color, size }) => {
   );
 };
 
-const StarRating = ({ max = 5, color, size = 20 }) => {
+Star.propTypes = {
+  onRate: PropTypes.func.isRequired,
+  full: PropTypes.bool.isRequired,
+  onHoverIn: PropTypes.func.isRequired,
+  onHoverOut: PropTypes.func.isRequired,
+  color: PropTypes.string.isRequired,
+  size: PropTypes.number.isRequired,
+};
+
+
+const StarRating = ({ max = 5, color, size = 20, onSetRating }) => {
   const [rating, setRating] = useState(0);
   const [tempRating, setTempRating] = useState(0);
 
   const handleRating = (rating) => {
     setRating(rating);
+    onSetRating(rating)
   };
 
   return (
@@ -101,6 +102,7 @@ StarRating.propTypes = {
   max: PropTypes.number,
   color: PropTypes.string,
   size: PropTypes.number,
+  onSetRating: PropTypes.func
 };
 
 export default StarRating;
